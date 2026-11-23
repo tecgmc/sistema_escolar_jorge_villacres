@@ -1,0 +1,7 @@
+<?php
+require_once "config/auth.php"; require_roles(["Administrador"]);$msg="";
+if($_SERVER["REQUEST_METHOD"]==="POST"){$n=trim($_POST["nombre"]??"");$d=trim($_POST["descripcion"]??"");if($n){$s=$conn->prepare("INSERT INTO asignaturas(nombre,descripcion) VALUES(?,?)");$s->bind_param("ss",$n,$d);$msg=$s->execute()?"Asignatura registrada.":"No se pudo registrar.";}}
+$rows=$conn->query("SELECT * FROM asignaturas ORDER BY id DESC");include "includes/header.php";?>
+<div class="mb-3"><span class="eyebrow">PLAN DE ESTUDIOS</span><h2 class="fw-bold">Asignaturas</h2></div><?php if($msg):?><div class="alert alert-info"><?=e($msg)?></div><?php endif;?>
+<div class="card border-0 shadow-sm mb-4"><div class="card-body"><form method="post" class="row g-3"><div class="col-md-5"><label class="form-label">Nombre</label><input class="form-control" name="nombre" required></div><div class="col-md-5"><label class="form-label">Descripción</label><input class="form-control" name="descripcion"></div><div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary">Añadir</button></div></form></div></div>
+<div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>#</th><th>Asignatura</th><th>Descripción</th></tr></thead><tbody><?php while($r=$rows->fetch_assoc()):?><tr><td><?=$r["id"]?></td><td><?=e($r["nombre"])?></td><td><?=e($r["descripcion"])?></td></tr><?php endwhile;?></tbody></table></div></div><?php include "includes/footer.php";?>

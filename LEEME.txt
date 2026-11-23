@@ -1,0 +1,31 @@
+SISTEMA DE GESTIÓN ESCOLAR
+Institución: ESCUELA DE EDUCACIÓN BÁSICA JORGE VILLACRÉS MOSCOSO
+Período lectivo: 2026 - 2027
+
+INSTALACIÓN EN XAMPP
+1. Copia la carpeta sistema_escolar dentro de C:\xampp\htdocs\
+2. Inicia Apache y MySQL desde XAMPP Control Panel.
+3. Confirma que la base de datos escuela_db y sus tablas estén creadas en phpMyAdmin.
+4. Abre en Chrome: http://localhost/sistema_escolar/setup_access.php
+5. El archivo prepara las contraseñas iniciales. Después de ejecutarlo, elimina setup_access.php.
+6. Abre: http://localhost/sistema_escolar/
+
+CUENTAS DE DEMOSTRACIÓN
+Administrador
+Correo: admin@jorgevillacres.edu.ec
+Contraseña: Admin2026*
+
+Profesor
+Correo: profesor@jorgevillacres.edu.ec
+Contraseña: Profesor2026*
+
+Estudiante
+Correo: estudiante@jorgevillacres.edu.ec
+Contraseña: Estudiante2026*
+
+NOTAS
+- La conexión local está configurada para XAMPP con usuario MySQL root y contraseña vacía, que es la configuración habitual inicial.
+- Se requiere conexión a Internet para cargar Bootstrap desde su CDN.
+- Los nombres y registros de ejemplo son ficticios y se usan únicamente para demostrar el funcionamiento.
+- Este proyecto es una base académica funcional. Antes de usarlo con datos reales se recomienda reforzar permisos por curso, validaciones, auditoría, copias de seguridad y protección de despliegue.
+- El proyecto usa PHP nativo, MySQL, HTML, CSS, JavaScript y Bootstrap 5.

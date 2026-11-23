@@ -1,0 +1,21 @@
+<?php
+require_once "config/auth.php"; require_roles(["Administrador","Profesor","Estudiante"]);$msg="";
+if($_SERVER["REQUEST_METHOD"]==="POST" && in_array(current_role(),["Administrador","Profesor"],true)){
+$eid=(int)($_POST["estudiante_id"]??0);$aid=(int)($_POST["asignacion_id"]??0);$par=trim($_POST["parcial"]??"");$nota=(float)($_POST["nota"]??0);$fecha=$_POST["fecha"]??date("Y-m-d");$obs=trim($_POST["observacion"]??"");
+if($eid&&$aid&&$par&&$nota>=0&&$nota<=10){$s=$conn->prepare("INSERT INTO calificaciones(estudiante_id,asignacion_id,parcial,nota,observacion,fecha) VALUES(?,?,?,?,?,?)");$s->bind_param("iisdss",$eid,$aid,$par,$nota,$obs,$fecha);$msg=$s->execute()?"Calificación registrada.":"No se pudo guardar la calificación.";}else $msg="Revisa los datos y recuerda que la nota debe estar entre 0 y 10.";
+}
+$students=$conn->query("SELECT e.id,u.nombre,u.apellido FROM estudiantes e JOIN usuarios u ON u.id=e.usuario_id");
+$assign=$conn->query("SELECT a.id,asig.nombre AS materia,c.nombre AS curso FROM asignaciones a JOIN asignaturas asig ON asig.id=a.asignatura_id JOIN cursos c ON c.id=a.curso_id");
+if(current_role()==="Estudiante"){$uid=(int)$_SESSION["usuario"]["id"];$q=$conn->prepare("SELECT cal.*,asig.nombre AS materia FROM calificaciones cal JOIN estudiantes e ON e.id=cal.estudiante_id JOIN asignaciones a ON a.id=cal.asignacion_id JOIN asignaturas asig ON asig.id=a.asignatura_id WHERE e.usuario_id=? ORDER BY cal.fecha DESC");$q->bind_param("i",$uid);$q->execute();$rows=$q->get_result();}
+else $rows=$conn->query("SELECT cal.*,u.nombre,u.apellido,asig.nombre AS materia FROM calificaciones cal JOIN estudiantes e ON e.id=cal.estudiante_id JOIN usuarios u ON u.id=e.usuario_id JOIN asignaciones a ON a.id=cal.asignacion_id JOIN asignaturas asig ON asig.id=a.asignatura_id ORDER BY cal.fecha DESC");
+include "includes/header.php";?>
+<div class="mb-3"><span class="eyebrow">RENDIMIENTO ACADÉMICO</span><h2 class="fw-bold">Calificaciones</h2></div><?php if($msg):?><div class="alert alert-info"><?=e($msg)?></div><?php endif;?>
+<?php if(in_array(current_role(),["Administrador","Profesor"],true)):?><div class="card border-0 shadow-sm mb-4"><div class="card-body"><h5 class="fw-bold">Registrar calificación</h5><form method="post" class="row g-3">
+<div class="col-md-3"><label class="form-label">Estudiante</label><select class="form-select" name="estudiante_id" required><?php while($s=$students->fetch_assoc()):?><option value="<?=$s["id"]?>"><?=e($s["nombre"]." ".$s["apellido"])?></option><?php endwhile;?></select></div>
+<div class="col-md-3"><label class="form-label">Asignatura / curso</label><select class="form-select" name="asignacion_id" required><?php while($a=$assign->fetch_assoc()):?><option value="<?=$a["id"]?>"><?=e($a["materia"]." - ".$a["curso"])?></option><?php endwhile;?></select></div>
+<div class="col-md-2"><label class="form-label">Parcial</label><input class="form-control" name="parcial" value="Primer parcial" required></div>
+<div class="col-md-1"><label class="form-label">Nota</label><input class="form-control" type="number" min="0" max="10" step=".01" name="nota" required></div>
+<div class="col-md-2"><label class="form-label">Fecha</label><input class="form-control" type="date" name="fecha" value="<?=date("Y-m-d")?>" required></div>
+<div class="col-md-1 d-flex align-items-end"><button class="btn btn-primary">Guardar</button></div>
+<div class="col-12"><label class="form-label">Observación</label><input class="form-control" name="observacion"></div></form></div></div><?php endif;?>
+<div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table mb-0"><thead><tr><?php if(current_role()!=="Estudiante"):?><th>Estudiante</th><?php endif;?><th>Asignatura</th><th>Parcial</th><th>Nota</th><th>Fecha</th><th>Observación</th></tr></thead><tbody><?php while($r=$rows->fetch_assoc()):?><tr><?php if(current_role()!=="Estudiante"):?><td><?=e($r["nombre"]." ".$r["apellido"])?></td><?php endif;?><td><?=e($r["materia"])?></td><td><?=e($r["parcial"])?></td><td><strong><?=number_format((float)$r["nota"],2)?></strong></td><td><?=e($r["fecha"])?></td><td><?=e($r["observacion"])?></td></tr><?php endwhile;?></tbody></table></div></div><?php include "includes/footer.php";?>
